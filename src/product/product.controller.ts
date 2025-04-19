@@ -2,6 +2,7 @@ import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { CreateProdcutPayload } from './types/CreateProductPayload.interface';
+import { UpdateProdcutPayload } from './types/UpdateProductPayload.interface';
 
 @Controller('api/product')
 export class ProductController {
@@ -12,6 +13,7 @@ export class ProductController {
 
   async onModuleInit() {
     this.productClient.subscribeToResponseOf('product.create');
+    this.productClient.subscribeToResponseOf('product.update');
     this.productClient.subscribeToResponseOf('product.get-all-paginated');
     this.userClient.subscribeToResponseOf('users.get-seller-by-seller-id');
     await this.productClient.connect();
@@ -20,6 +22,11 @@ export class ProductController {
   @Post('create')
   async register(@Body() body: CreateProdcutPayload) {
     return this.productClient.send('product.create', body).toPromise();
+  }
+
+  @Post('update')
+  async update(@Body() body: UpdateProdcutPayload) {
+    return this.productClient.send('product.update', body).toPromise();
   }
 
   @Get('get-all-products/paginated')
