@@ -1,6 +1,7 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
+import { RegisterUserPayload } from './types/RegisterUserPayload.interface';
 
 @Controller('api/auth')
 export class AuthController {
@@ -14,7 +15,7 @@ export class AuthController {
   }
 
   @Post('register')
-  async register(@Body() body: { email: string; password: string }) {
+  async register(@Body() body: RegisterUserPayload) {
     return this.authClient.send('auth.register', body).toPromise();
   }
 }
