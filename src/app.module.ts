@@ -7,6 +7,7 @@ import { ProductController } from './product/product.controller';
 import { OrderController } from './order/order.controller';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import CacheService from './cache.service';
+import { OrderService } from './order/order.service';
 
 @Module({
   imports: [
@@ -75,6 +76,6 @@ import CacheService from './cache.service';
     ProductController,
     OrderController,
   ],
-  providers: [AppService, CacheService],
+  providers: [AppService, CacheService, OrderService],
 })
 export class AppModule {}

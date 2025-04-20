@@ -1,12 +1,14 @@
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { CreateOrderPayload } from './types/CreateOrderPayload';
+import { OrderService } from './order.service';
 
 @Controller('api/orders')
 export class OrderController {
   constructor(
     @Inject('ORDER_SERVICE') private readonly orderClient: ClientKafka,
     @Inject('USERS_SERVICE') private readonly userClient: ClientKafka,
+    private _orderService: OrderService,
   ) {}
 
   async onModuleInit() {
@@ -47,6 +49,11 @@ export class OrderController {
       .send('order.get-orders-by-buyerId', buyerId)
       .toPromise();
 
-    return orders;
+    const orderWithProductDetails =
+      await this._orderService.attachProductDetailsToOrderItems(
+        orders.ordersWithItems,
+      );
+
+    return orderWithProductDetails;
   }
 }
