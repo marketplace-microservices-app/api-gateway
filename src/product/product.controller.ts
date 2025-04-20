@@ -3,12 +3,14 @@ import { ClientKafka } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { CreateProdcutPayload } from './types/CreateProductPayload.interface';
 import { UpdateProdcutPayload } from './types/UpdateProductPayload.interface';
+import CacheService from 'src/cache.service';
 
 @Controller('api/product')
 export class ProductController {
   constructor(
     @Inject('PRODUCT_SERVICE') private readonly productClient: ClientKafka,
     @Inject('USERS_SERVICE') private readonly userClient: ClientKafka,
+    private _cacheService: CacheService,
   ) {}
 
   async onModuleInit() {
@@ -34,6 +36,15 @@ export class ProductController {
     @Query('skip') skip: string,
     @Query('take') take: string,
   ) {
+    // Check if the data is already cached
+    const cacheKey = `products:${skip}:${take}`;
+    const cachedProducts = await this._cacheService.get(cacheKey);
+    if (cachedProducts) {
+      console.log(`Cache found for ${cacheKey}`);
+      return JSON.parse(cachedProducts);
+    }
+    console.log(`NO Cache found for ${cacheKey}! Fetching from Servers...`);
+
     const payload = {
       skip: Number(skip),
       take: Number(take),
@@ -52,11 +63,26 @@ export class ProductController {
             sellerId: product.seller_id,
           })
           .toPromise();
-        console.log(JSON.stringify(seller, null, 2));
         return { ...product, seller };
       }),
     );
 
-    return productsWithSeller;
+    const finalResponse = {
+      status: products.status,
+      message: products.message,
+      total: products.total,
+      data: productsWithSeller,
+    };
+
+    // Step 4: Cache it
+    // Cache the result for next requests
+    await this._cacheService
+      .set(cacheKey, JSON.stringify(finalResponse), 300)
+      .catch((err) => {
+        console.error('Error caching data:', err);
+      });
+    console.log(`${cacheKey} Data cached successfully!`);
+
+    return finalResponse;
   }
 }

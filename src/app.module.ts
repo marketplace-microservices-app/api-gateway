@@ -4,8 +4,9 @@ import { AppService } from './app.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthController } from './auth/auth.controller';
 import { ProductController } from './product/product.controller';
-import { OrderModule } from './order/order.module';
 import { OrderController } from './order/order.controller';
+import { RedisModule } from '@nestjs-modules/ioredis';
+import CacheService from './cache.service';
 
 @Module({
   imports: [
@@ -63,6 +64,10 @@ import { OrderController } from './order/order.controller';
         },
       },
     ]),
+    RedisModule.forRoot({
+      type: 'single',
+      url: 'redis://localhost:6379',
+    }),
   ],
   controllers: [
     AppController,
@@ -70,6 +75,6 @@ import { OrderController } from './order/order.controller';
     ProductController,
     OrderController,
   ],
-  providers: [AppService],
+  providers: [AppService, CacheService],
 })
 export class AppModule {}
