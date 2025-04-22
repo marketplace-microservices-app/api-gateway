@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { CreateProdcutPayload } from './types/CreateProductPayload.interface';
@@ -84,5 +84,22 @@ export class ProductController {
     console.log(`${cacheKey} Data cached successfully!`);
 
     return finalResponse;
+  }
+
+  @Get('get-product-details-by-productId/:productId')
+  async getProductDetailsByProductId(@Param('productId') productId: string) {
+    const productData = await this.productClient
+      .send('product.get-product-details-by-productId', productId)
+      .toPromise();
+    // Populate Seller data
+    const seller = await this.userClient
+      .send('users.get-seller-by-seller-id', {
+        sellerId: productData.seller_id,
+      })
+      .toPromise();
+
+    productData['seller'] = seller;
+
+    return productData;
   }
 }
