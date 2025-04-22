@@ -98,7 +98,7 @@ export class ProductController {
       })
       .toPromise();
 
-    productData['seller'] = seller;
+    productData.data['seller'] = seller;
 
     return productData;
   }
