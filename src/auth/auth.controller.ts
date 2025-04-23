@@ -13,6 +13,7 @@ export class AuthController {
   async onModuleInit() {
     this.authClient.subscribeToResponseOf('auth.register');
     this.authClient.subscribeToResponseOf('auth.login');
+    this.authClient.subscribeToResponseOf('auth.refresh');
     await this.authClient.connect();
   }
 
@@ -24,5 +25,10 @@ export class AuthController {
   @Post('login')
   async login(@Body() body: LoginUserPayload) {
     return this.authClient.send('auth.login', body).toPromise();
+  }
+
+  @Post('refresh')
+  async refresh(@Body() body) {
+    return this.authClient.send('auth.refresh', body).toPromise();
   }
 }
