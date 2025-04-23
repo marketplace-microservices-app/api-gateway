@@ -17,7 +17,13 @@ export class ProductController {
     this.productClient.subscribeToResponseOf('product.create');
     this.productClient.subscribeToResponseOf('product.update');
     this.productClient.subscribeToResponseOf('product.get-all-paginated');
+    this.productClient.subscribeToResponseOf(
+      'product.get-all-products-by-sellerId',
+    );
     this.userClient.subscribeToResponseOf('users.get-seller-by-seller-id');
+    this.userClient.subscribeToResponseOf(
+      'users.get-seller-details-from-userId',
+    );
     await this.productClient.connect();
   }
 
@@ -101,5 +107,23 @@ export class ProductController {
     productData.data['seller'] = seller;
 
     return productData;
+  }
+
+  @Get('get-all-products-by-userId/:userId')
+  async getAllProductsByUserId(@Param('userId') userId: string) {
+    const sellerDetails = await this.userClient
+      .send('users.get-seller-details-from-userId', userId)
+      .toPromise();
+
+    const sellerId = sellerDetails?.data.id;
+    if (!sellerId) {
+      throw new Error('Seller ID not found for the given user ID');
+    }
+
+    const products = await this.productClient
+      .send('product.get-all-products-by-sellerId', sellerId)
+      .toPromise();
+
+    return products;
   }
 }

@@ -30,4 +30,21 @@ export class UsersController {
 
     return buyerDetails;
   }
+
+  @Get('get-seller-details-from-userId/:userId')
+  async getSellerIdFromUserId(@Param('userId') userId: string) {
+    const payload = {
+      userId: userId,
+    };
+
+    const sellerDetails = await this.userClient
+      .send('users.get-seller-details-from-userId', payload)
+      .toPromise();
+
+    if (!sellerDetails) {
+      throw new Error('Buyer ID not found for the given user ID');
+    }
+
+    return sellerDetails;
+  }
 }
