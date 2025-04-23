@@ -1,9 +1,18 @@
-import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { Inject } from '@nestjs/common';
 import { CreateProdcutPayload } from './types/CreateProductPayload.interface';
 import { UpdateProdcutPayload } from './types/UpdateProductPayload.interface';
 import CacheService from 'src/cache.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('api/product')
 export class ProductController {
@@ -27,16 +36,19 @@ export class ProductController {
     await this.productClient.connect();
   }
 
+  @UseGuards(AuthGuard)
   @Post('create')
   async register(@Body() body: CreateProdcutPayload) {
     return this.productClient.send('product.create', body).toPromise();
   }
 
+  @UseGuards(AuthGuard)
   @Post('update')
   async update(@Body() body: UpdateProdcutPayload) {
     return this.productClient.send('product.update', body).toPromise();
   }
 
+  @UseGuards(AuthGuard)
   @Get('get-all-products/paginated')
   async getAllProductsPaginated(
     @Query('skip') skip: string,
@@ -92,6 +104,7 @@ export class ProductController {
     return finalResponse;
   }
 
+  @UseGuards(AuthGuard)
   @Get('get-product-details-by-productId/:productId')
   async getProductDetailsByProductId(@Param('productId') productId: string) {
     const productData = await this.productClient
@@ -109,6 +122,7 @@ export class ProductController {
     return productData;
   }
 
+  @UseGuards(AuthGuard)
   @Get('get-all-products-by-userId/:userId')
   async getAllProductsByUserId(@Param('userId') userId: string) {
     const sellerDetails = await this.userClient

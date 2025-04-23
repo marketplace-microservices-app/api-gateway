@@ -1,5 +1,6 @@
-import { Controller, Get, Inject, Param } from '@nestjs/common';
+import { Controller, Get, Inject, Param, UseGuards } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('api/users')
 export class UsersController {
@@ -14,6 +15,7 @@ export class UsersController {
     await this.userClient.connect();
   }
 
+  @UseGuards(AuthGuard)
   @Get('get-buyer-details-from-userId/:userId')
   async getBuyerIdFromUserId(@Param('userId') userId: string) {
     const payload = {
@@ -31,6 +33,7 @@ export class UsersController {
     return buyerDetails;
   }
 
+  @UseGuards(AuthGuard)
   @Get('get-seller-details-from-userId/:userId')
   async getSellerIdFromUserId(@Param('userId') userId: string) {
     const sellerDetails = await this.userClient

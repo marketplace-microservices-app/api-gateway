@@ -1,7 +1,8 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { CreateOrderPayload } from './types/CreateOrderPayload';
 import { OrderService } from './order.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('api/orders')
 export class OrderController {
@@ -22,16 +23,19 @@ export class OrderController {
     await this.orderClient.connect();
   }
 
+  @UseGuards(AuthGuard)
   @Post('create')
   async create(@Body() body: CreateOrderPayload) {
     return this.orderClient.send('order.create', body).toPromise();
   }
 
+  @UseGuards(AuthGuard)
   @Post('cancel')
   async cancel(@Body() orderId: string) {
     return this.orderClient.send('order.cancel', orderId).toPromise();
   }
 
+  @UseGuards(AuthGuard)
   @Post('get-all-orders-by-userId')
   async getAllOrdersByUserId(@Body() userId: string) {
     // Get buyer_id from the user_id
