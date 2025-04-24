@@ -9,9 +9,15 @@ import { RedisModule } from '@nestjs-modules/ioredis';
 import CacheService from './cache.service';
 import { OrderService } from './order/order.service';
 import { UsersController } from './users/users.controller';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    // ConfigModule setup
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     ClientsModule.register([
       {
         name: 'AUTH_SERVICE',
@@ -19,7 +25,7 @@ import { UsersController } from './users/users.controller';
         options: {
           client: {
             clientId: 'api-gateway',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA_BROKER || ''],
           },
           consumer: {
             groupId: 'api-gateway-auth-consumer',
@@ -32,7 +38,7 @@ import { UsersController } from './users/users.controller';
         options: {
           client: {
             clientId: 'api-gateway',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA_BROKER || ''],
           },
           consumer: {
             groupId: 'api-gateway-user-consumer',
@@ -45,7 +51,7 @@ import { UsersController } from './users/users.controller';
         options: {
           client: {
             clientId: 'api-gateway',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA_BROKER || ''],
           },
           consumer: {
             groupId: 'api-gateway-product-consumer',
@@ -58,7 +64,7 @@ import { UsersController } from './users/users.controller';
         options: {
           client: {
             clientId: 'api-gateway',
-            brokers: ['localhost:9092'],
+            brokers: [process.env.KAFKA_BROKER || ''],
           },
           consumer: {
             groupId: 'api-gateway-order-consumer',
@@ -68,7 +74,7 @@ import { UsersController } from './users/users.controller';
     ]),
     RedisModule.forRoot({
       type: 'single',
-      url: 'redis://localhost:6379',
+      url: process.env.REDIS_URL || '',
     }),
   ],
   controllers: [
